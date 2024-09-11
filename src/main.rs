@@ -5,6 +5,7 @@ use env_logger::Env;
 use log::{debug, error, info, log_enabled, Level};
 
 const MODE: &str = dotenv!("MODE");
+const QA_API_KEY: &str = dotenv!("QA_API_KEY");
 
 #[get("/hello/{name}")]
 async fn greet(name: web::Path<String>) -> impl Responder {
