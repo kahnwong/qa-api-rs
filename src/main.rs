@@ -4,9 +4,11 @@ use env_logger::Env;
 // use log::{debug, error, info, log_enabled, Level};
 use actix_web::middleware::Logger;
 
+const MODE: &str = dotenv!("MODE");
+
 #[get("/hello/{name}")]
 async fn greet(name: web::Path<String>) -> impl Responder {
-    println!("{}", dotenv!("MODE"));
+    println!("{}", MODE);
     // info!("Info!!!");
     format!("FFF {name}!")
 }
