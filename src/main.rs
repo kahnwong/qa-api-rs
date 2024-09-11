@@ -1,9 +1,11 @@
-use dotenv_codegen::dotenv;
 use actix_web::{get, web, App, HttpServer, Responder};
+use dotenv_codegen::dotenv;
+use tklog::{debug, error, fatal, info, trace, warn};
 
 #[get("/hello/{name}")]
 async fn greet(name: web::Path<String>) -> impl Responder {
     println!("{}", dotenv!("MODE"));
+    info!("Info!!!");
     format!("FFF {name}!")
 }
 

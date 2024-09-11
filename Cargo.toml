@@ -6,3 +6,4 @@ edition = "2021"
 [dependencies]
 actix-web = "4.9.0"
 dotenv_codegen = "0.15.0"
+tklog = "0.2.0"
