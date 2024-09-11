@@ -1,6 +1,7 @@
 use actix_web::{get, web, App, HttpServer, Responder};
 use dotenv_codegen::dotenv;
-use tklog::{debug, error, fatal, info, trace, warn};
+use env_logger::Env;
+use log::{debug, error, info, log_enabled, Level};
 
 #[get("/hello/{name}")]
 async fn greet(name: web::Path<String>) -> impl Responder {
@@ -16,6 +17,8 @@ async fn foo(i: web::Path<String>) -> impl Responder {
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
+    env_logger::Builder::from_env(Env::default().default_filter_or("info")).init();
+
     HttpServer::new(|| App::new().service(greet).service(foo))
         .bind(("127.0.0.1", 8080))?
         .run()
