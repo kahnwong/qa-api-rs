@@ -1,15 +1,15 @@
+use actix_web::middleware::Logger;
 use actix_web::{get, web, App, HttpServer, Responder};
 use dotenv_codegen::dotenv;
 use env_logger::Env;
-// use log::{debug, error, info, log_enabled, Level};
-use actix_web::middleware::Logger;
+use log::{debug, error, info, log_enabled, Level};
 
 const MODE: &str = dotenv!("MODE");
 
 #[get("/hello/{name}")]
 async fn greet(name: web::Path<String>) -> impl Responder {
     println!("{}", MODE);
-    // info!("Info!!!");
+    info!("Info!!!");
     format!("FFF {name}!")
 }
 
