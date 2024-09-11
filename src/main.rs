@@ -1,10 +1,10 @@
 mod llm;
-use std::error::Error;
 use crate::llm::llm_call;
 use actix_web::middleware::Logger;
 use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder};
 use dotenv_codegen::dotenv;
 use serde::{Deserialize, Serialize};
+use std::error::Error;
 
 const MODE: &str = dotenv!("MODE");
 const QA_API_KEY: &str = dotenv!("QA_API_KEY");
@@ -31,21 +31,14 @@ async fn root() -> impl Responder {
 async fn submit(body: web::Bytes) -> Result<HttpResponse, actix_web::Error> {
     let request = serde_json::from_slice::<SubmitRequest>(&body)?;
 
-    let answer: Result<String, Box<dyn Error>> = llm_call(&request.query).await;
-    match answer {
-        Ok(string) => {
-            println!("Function succeeded: {}", string);
-        }
-        Err(error) => {
-            eprintln!("Function failed: {}", error);
-        }
-    }
+    let answer = llm_call(&request.query).await?;
+    println!("{}", answer);
 
     // return response
     let response = SubmitResponse {
         request_id: request.request_id,
         query: (&request.query).to_string(),
-        response:"foo".to_string(),
+        response: "foo".to_string(),
     };
 
     log::info!("{:?}", response);

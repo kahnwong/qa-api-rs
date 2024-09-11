@@ -1,8 +1,8 @@
 use dotenv_codegen::dotenv;
-use reqwest::{Client, StatusCode, Response};
-use serde_json::from_str;
+use reqwest::{Client, Response, StatusCode};
 use serde_derive::Deserialize;
 use serde_derive::Serialize;
+use serde_json::from_str;
 use std::error::Error;
 use std::ops::Index;
 
@@ -43,26 +43,29 @@ pub struct UsageMetadata {
     pub total_token_count: i64,
 }
 
-pub async fn llm_call(query: &String) -> Result<String, Box<dyn Error>>   {
+pub async fn llm_call(query: &String) -> Result<String, Box<dyn Error>> {
     let client = Client::new();
 
     let url = format!("https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={}", GOOGLE_AI_API_KEY);
     let payload = &serde_json::json!({
-      "contents": [{
-        "parts":[{"text": format!("{}", query), }]
-        }]
-       });
+    "contents": [{
+      "parts":[{"text": format!("{}", query), }]
+      }]
+     });
 
-    let response = client
-        .post(url)
-        .json(&payload)
-        .send()
-        .await?;
+    let response = client.post(url).json(&payload).send().await?;
 
     // parse
     let response_text = response.text().await?;
     let response_struct: GeminiResponse = from_str(&response_text)?;
 
-    let answer = response_struct.candidates.index(0).content.parts.index(0).text.clone();
+    let answer = response_struct
+        .candidates
+        .index(0)
+        .content
+        .parts
+        .index(0)
+        .text
+        .clone();
     Ok(answer)
 }
