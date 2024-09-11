@@ -20,7 +20,7 @@ async fn main() -> std::io::Result<()> {
     env_logger::init_from_env(Env::default().default_filter_or("info"));
 
     // set hostname
-    let mut listen_address = "";
+    let listen_address;
     match MODE {
         "production" => listen_address = "0.0.0.0",
         "development" => listen_address = "127.0.0.1",
