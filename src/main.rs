@@ -1,3 +1,6 @@
+mod llm;
+
+use crate::llm::call_llm;
 use actix_web::middleware::Logger;
 use actix_web::{get, post, web, App, Error, HttpResponse, HttpServer, Responder};
 use dotenv_codegen::dotenv;
@@ -6,10 +9,17 @@ use serde::{Deserialize, Serialize};
 const MODE: &str = dotenv!("MODE");
 const QA_API_KEY: &str = dotenv!("QA_API_KEY");
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize)]
 struct SubmitRequest {
     request_id: String,
     query: String,
+}
+
+#[derive(Serialize, Deserialize)]
+struct SubmitResponse {
+    request_id: String,
+    query: String,
+    response: String,
 }
 
 #[get("/")]
@@ -21,10 +31,17 @@ async fn root() -> impl Responder {
 async fn submit(body: web::Bytes) -> Result<HttpResponse, Error> {
     log::info!("Info!!!");
 
-    let obj = serde_json::from_slice::<SubmitRequest>(&body)?;
-    // println!("{:?}", obj.query);
+    let r = serde_json::from_slice::<SubmitRequest>(&body)?;
+    let response = call_llm(&r.query);
 
-    Ok(HttpResponse::Ok().json(obj))
+    // log::info!("{:?}", obj);
+
+    let result = Ok(HttpResponse::Ok().json(SubmitResponse {
+        request_id: r.request_id,
+        query: (&r.query).to_string(),
+        response,
+    }));
+    result
 }
 
 #[actix_web::main]
