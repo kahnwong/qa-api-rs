@@ -1,8 +1,8 @@
 mod llm;
-
-use crate::llm::call_llm;
+use std::error::Error;
+use crate::llm::llm_call;
 use actix_web::middleware::Logger;
-use actix_web::{get, post, web, App, Error, HttpResponse, HttpServer, Responder};
+use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder};
 use dotenv_codegen::dotenv;
 use serde::{Deserialize, Serialize};
 
@@ -28,22 +28,29 @@ async fn root() -> impl Responder {
 }
 
 #[post("/submit")]
-async fn submit(body: web::Bytes) -> Result<HttpResponse, Error> {
-    log::info!("Info!!!");
+async fn submit(body: web::Bytes) -> Result<HttpResponse, actix_web::Error> {
+    let request = serde_json::from_slice::<SubmitRequest>(&body)?;
 
-    let r = serde_json::from_slice::<SubmitRequest>(&body)?;
-    let answer = call_llm(&r.query);
+    let answer: Result<String, Box<dyn Error>> = llm_call(&request.query).await;
+    match answer {
+        Ok(string) => {
+            println!("Function succeeded: {}", string);
+        }
+        Err(error) => {
+            eprintln!("Function failed: {}", error);
+        }
+    }
 
+    // return response
     let response = SubmitResponse {
-        request_id: r.request_id,
-        query: (&r.query).to_string(),
-        response: answer,
+        request_id: request.request_id,
+        query: (&request.query).to_string(),
+        response:"foo".to_string(),
     };
 
     log::info!("{:?}", response);
 
-    let result = Ok(HttpResponse::Ok().json(response));
-    result
+    Ok(HttpResponse::Ok().json(response))
 }
 
 #[actix_web::main]
