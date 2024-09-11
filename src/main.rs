@@ -7,6 +7,11 @@ use log::{debug, error, info, log_enabled, Level};
 const MODE: &str = dotenv!("MODE");
 const QA_API_KEY: &str = dotenv!("QA_API_KEY");
 
+#[get("/")]
+async fn root() -> impl Responder {
+    "Welcome to qa-api-rs"
+}
+
 #[get("/hello/{name}")]
 async fn greet(name: web::Path<String>) -> impl Responder {
     println!("{}", MODE);
@@ -31,8 +36,13 @@ async fn main() -> std::io::Result<()> {
     }
 
     // init server
-    HttpServer::new(|| App::new().wrap(Logger::default()).service(greet))
-        .bind(("127.0.0.1", 8080))?
-        .run()
-        .await
+    HttpServer::new(|| {
+        App::new()
+            .wrap(Logger::default())
+            .service(root)
+            .service(greet)
+    })
+    .bind(("127.0.0.1", 8080))?
+    .run()
+    .await
 }
