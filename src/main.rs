@@ -15,7 +15,7 @@ struct SubmitRequest {
     query: String,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 struct SubmitResponse {
     request_id: String,
     query: String,
@@ -32,15 +32,17 @@ async fn submit(body: web::Bytes) -> Result<HttpResponse, Error> {
     log::info!("Info!!!");
 
     let r = serde_json::from_slice::<SubmitRequest>(&body)?;
-    let response = call_llm(&r.query);
+    let answer = call_llm(&r.query);
 
-    // log::info!("{:?}", obj);
-
-    let result = Ok(HttpResponse::Ok().json(SubmitResponse {
+    let response = SubmitResponse {
         request_id: r.request_id,
         query: (&r.query).to_string(),
-        response,
-    }));
+        response: answer,
+    };
+
+    log::info!("{:?}", response);
+
+    let result = Ok(HttpResponse::Ok().json(response));
     result
 }
 
