@@ -1,47 +1,46 @@
 use dotenv_codegen::dotenv;
 use reqwest::Client;
 use serde_derive::Deserialize;
-use serde_derive::Serialize;
 use serde_json::from_str;
 use std::error::Error;
 use std::ops::Index;
 
 const GOOGLE_AI_API_KEY: &str = dotenv!("GOOGLE_AI_API_KEY");
 
-#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct GeminiResponse {
     pub candidates: Vec<Candidate>,
-    pub usage_metadata: UsageMetadata,
+    // pub usage_metadata: UsageMetadata,
 }
 
-#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Candidate {
     pub content: Content,
-    pub finish_reason: String,
+    // pub finish_reason: String,
 }
 
-#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Content {
     pub parts: Vec<Part>,
-    pub role: String,
+    // pub role: String,
 }
 
-#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Part {
     pub text: String,
 }
 
-#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct UsageMetadata {
-    pub prompt_token_count: i64,
-    pub candidates_token_count: i64,
-    pub total_token_count: i64,
-}
+// #[derive(Deserialize)]
+// #[serde(rename_all = "camelCase")]
+// pub struct UsageMetadata {
+//     pub prompt_token_count: i64,
+//     pub candidates_token_count: i64,
+//     pub total_token_count: i64,
+// }
 
 pub async fn llm_call(query: &String) -> Result<String, Box<dyn Error>> {
     let client = Client::new();
