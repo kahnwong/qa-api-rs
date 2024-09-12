@@ -3,4 +3,4 @@ build:
 run:
 	./target/release/qa-api-rs
 dev:
-	fd rs | entr cargo run
+	systemfd --no-pid -s http::3000 -- cargo watch -x run
