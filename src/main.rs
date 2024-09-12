@@ -2,15 +2,20 @@ mod llm;
 mod routes;
 
 use crate::routes::{root, submit};
+use axum::extract::Request;
+use axum::http::StatusCode;
+use axum::middleware::Next;
+use axum::response::{IntoResponse, Response};
 use axum::{
+    middleware,
     routing::{get, post},
     Router,
 };
-// use dotenv_codegen::dotenv;
+use dotenv_codegen::dotenv;
 use listenfd::ListenFd;
 use tokio::net::TcpListener;
 
-// const QA_API_KEY: &str = dotenv!("QA_API_KEY");
+const QA_API_KEY: &str = dotenv!("QA_API_KEY");
 
 #[tokio::main]
 async fn main() {
@@ -20,7 +25,8 @@ async fn main() {
     // routes
     let app = Router::new()
         .route("/", get(root))
-        .route("/submit", post(submit));
+        .route("/submit", post(submit))
+        .layer(middleware::from_fn(auth_middleware));
 
     // init server
     let mut listenfd = ListenFd::from_env();
@@ -33,4 +39,16 @@ async fn main() {
     };
 
     axum::serve(listener, app).await.unwrap();
+}
+
+async fn auth_middleware(req: Request, next: Next) -> Response {
+    if let Some(api_key) = req.headers().get("x-api-key") {
+        println!("{:?}", api_key);
+
+        if api_key == QA_API_KEY {
+            return next.run(req).await;
+        }
+    }
+
+    (StatusCode::UNAUTHORIZED, "Unauthorized").into_response()
 }
