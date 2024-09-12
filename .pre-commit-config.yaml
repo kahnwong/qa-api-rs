@@ -21,6 +21,17 @@ repos:
       - id: yamlfmt
         args: [--mapping, "2", --sequence, "4", --offset, "2", --width, "150", --preserve-quotes]
         exclude: ^.github/dependabot.yaml
+  - repo: https://github.com/AleksaC/hadolint-py
+    rev: v2.12.1b3
+    hooks:
+      - id: hadolint
+        args:
+          - --ignore
+          - DL3025
+          - --ignore
+          - DL3018
+          - --ignore
+          - DL3027
   - repo: https://github.com/doublify/pre-commit-rust
     rev: v1.0
     hooks:
