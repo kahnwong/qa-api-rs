@@ -1,15 +1,17 @@
 mod llm;
 use crate::llm::llm_call;
-use actix_web::middleware::Logger;
-use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder};
+use axum::{
+    http::StatusCode,
+    routing::{get, post},
+    Json, Router,
+};
 use dotenv_codegen::dotenv;
 use serde::{Deserialize, Serialize};
-use std::error::Error;
 
 const MODE: &str = dotenv!("MODE");
-const QA_API_KEY: &str = dotenv!("QA_API_KEY");
+// const QA_API_KEY: &str = dotenv!("QA_API_KEY");
 
-#[derive(Serialize, Deserialize)]
+#[derive(Deserialize)]
 struct SubmitRequest {
     request_id: String,
     query: String,
@@ -22,54 +24,49 @@ struct SubmitResponse {
     response: String,
 }
 
-#[get("/")]
-async fn root() -> impl Responder {
+async fn root() -> &'static str {
     "Welcome to qa-api-rs"
 }
 
-#[post("/submit")]
-async fn submit(body: web::Bytes) -> Result<HttpResponse, actix_web::Error> {
-    let request = serde_json::from_slice::<SubmitRequest>(&body)?;
-
-    let answer = llm_call(&request.query).await?;
-    println!("{}", answer);
+async fn submit(Json(payload): Json<SubmitRequest>) -> (StatusCode, Json<SubmitResponse>) {
+    // get answer
+    let answer = llm_call(&payload.query).await.unwrap();
 
     // return response
     let response = SubmitResponse {
-        request_id: request.request_id,
-        query: (&request.query).to_string(),
-        response: "foo".to_string(),
+        request_id: payload.request_id,
+        query: (&payload.query).to_string(),
+        response: answer,
     };
 
-    log::info!("{:?}", response);
+    log::info!("{}", serde_json::to_string(&response).unwrap());
 
-    Ok(HttpResponse::Ok().json(response))
+    (StatusCode::OK, Json(response))
 }
 
-#[actix_web::main]
-async fn main() -> std::io::Result<()> {
+#[tokio::main]
+async fn main() {
     // init logger
     tracing_subscriber::fmt().json().init();
 
     // set hostname
-    let listen_address;
+    let listen_host;
     match MODE {
-        "production" => listen_address = "0.0.0.0",
-        "development" => listen_address = "127.0.0.1",
+        "production" => listen_host = "0.0.0.0",
+        "development" => listen_host = "127.0.0.1",
         _ => {
             log::error!("Please specify env MODE");
             std::process::exit(1);
         }
     }
+    let listen_address = format!("{}:3000", listen_host);
+
+    // routes
+    let app = Router::new()
+        .route("/", get(root))
+        .route("/submit", post(submit));
 
     // init server
-    HttpServer::new(|| {
-        App::new()
-            .wrap(Logger::default())
-            .service(root)
-            .service(submit)
-    })
-    .bind((listen_address, 8080))?
-    .run()
-    .await
+    let listener = tokio::net::TcpListener::bind(listen_address).await.unwrap();
+    axum::serve(listener, app).await.unwrap();
 }

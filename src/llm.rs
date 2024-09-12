@@ -1,5 +1,5 @@
 use dotenv_codegen::dotenv;
-use reqwest::{Client, Response, StatusCode};
+use reqwest::Client;
 use serde_derive::Deserialize;
 use serde_derive::Serialize;
 use serde_json::from_str;
