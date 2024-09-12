@@ -1,6 +1,5 @@
 mod llm;
 mod routes;
-
 use crate::routes::{root, submit};
 use axum::extract::Request;
 use axum::http::StatusCode;
@@ -23,10 +22,13 @@ async fn main() {
     tracing_subscriber::fmt().json().init();
 
     // routes
-    let app = Router::new()
-        .route("/", get(root))
+    let base = Router::new().route("/", get(root));
+
+    let qa = Router::new()
         .route("/submit", post(submit))
         .layer(middleware::from_fn(auth_middleware));
+
+    let app = base.merge(qa);
 
     // init server
     let mut listenfd = ListenFd::from_env();
