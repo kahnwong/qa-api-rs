@@ -1,30 +1,29 @@
 mod llm;
 mod routes;
+
 use crate::routes::{root, submit};
+
 use axum::{
     routing::{get, post},
     Router,
 };
-use dotenv::dotenv;
-use std::env;
+use dotenv_codegen::dotenv;
 
+const MODE: &str = dotenv!("MODE");
 // const QA_API_KEY: &str = dotenv!("QA_API_KEY");
 
 #[tokio::main]
 async fn main() {
-    // init
-    dotenv().ok();
-
     // init logger
     tracing_subscriber::fmt().json().init();
 
     // set hostname
-    let mode = env::var("MODE").expect("Please specify env MODE");
     let listen_host;
-    match mode.as_str() {
+    match MODE {
         "production" => listen_host = "0.0.0.0",
         "development" => listen_host = "127.0.0.1",
         _ => {
+            log::error!("Please specify env MODE");
             std::process::exit(1);
         }
     }
