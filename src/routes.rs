@@ -3,7 +3,7 @@ use axum::http::StatusCode;
 use axum::Json;
 use serde_derive::{Deserialize, Serialize};
 
-#[derive(Deserialize)]
+#[derive(Serialize, Deserialize)]
 pub struct SubmitRequest {
     request_id: String,
     query: String,
@@ -21,6 +21,8 @@ pub async fn root() -> &'static str {
 }
 
 pub async fn submit(Json(payload): Json<SubmitRequest>) -> (StatusCode, Json<SubmitResponse>) {
+    log::info!("{}", serde_json::to_string(&payload).unwrap());
+
     // get answer
     let answer = get_answer(&payload.query).await;
 
