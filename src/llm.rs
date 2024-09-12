@@ -46,11 +46,16 @@ pub async fn llm_call(query: &String) -> Result<String, Box<dyn Error>> {
     let client = Client::new();
 
     let url = format!("https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={}", GOOGLE_AI_API_KEY);
-    let payload = &serde_json::json!({
-    "contents": [{
-      "parts":[{"text": format!("{}", query), }]
-      }]
-     });
+    let payload = &serde_json::json!(
+        {
+            "contents": [{
+                "parts":[{"text": format!("{}", query)}]
+            }],
+            "generationConfig": {
+                "maxOutputTokens": 1024,
+            }
+        }
+    );
 
     let response = client.post(url).json(&payload).send().await?;
 
