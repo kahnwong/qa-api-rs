@@ -12,7 +12,11 @@ use axum::{
 };
 use dotenv_codegen::dotenv;
 use listenfd::ListenFd;
+use std::net::SocketAddr;
+use std::sync::Arc;
+use std::time::Duration;
 use tokio::net::TcpListener;
+use tower_governor::{governor::GovernorConfigBuilder, GovernorLayer};
 
 const QA_API_KEY: &str = dotenv!("QA_API_KEY");
 
@@ -21,12 +25,32 @@ async fn main() {
     // init logger
     tracing_subscriber::fmt().json().init();
 
+    // set rate limiting
+    let governor_conf = Arc::new(
+        GovernorConfigBuilder::default()
+            .per_second(1)
+            .finish()
+            .unwrap(),
+    );
+
+    let governor_limiter = governor_conf.limiter().clone();
+    let interval = Duration::from_secs(60);
+
+    std::thread::spawn(move || loop {
+        std::thread::sleep(interval);
+        tracing::info!("rate limiting storage size: {}", governor_limiter.len());
+        governor_limiter.retain_recent();
+    });
+
     // routes
     let base = Router::new().route("/", get(root));
 
     let qa = Router::new()
         .route("/submit", post(submit))
-        .layer(middleware::from_fn(auth_middleware));
+        .layer(middleware::from_fn(auth_middleware))
+        .layer(GovernorLayer {
+            config: governor_conf,
+        });
 
     let app = base.merge(qa);
 
@@ -40,7 +64,12 @@ async fn main() {
         None => TcpListener::bind("0.0.0.0:3000").await.unwrap(),
     };
 
-    axum::serve(listener, app).await.unwrap();
+    axum::serve(
+        listener,
+        app.into_make_service_with_connect_info::<SocketAddr>(),
+    )
+    .await
+    .unwrap();
 }
 
 async fn auth_middleware(req: Request, next: Next) -> Response {

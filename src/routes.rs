@@ -21,7 +21,7 @@ pub async fn root() -> &'static str {
 }
 
 pub async fn submit(Json(payload): Json<SubmitRequest>) -> (StatusCode, Json<SubmitResponse>) {
-    log::info!("{}", serde_json::to_string(&payload).unwrap());
+    tracing::info!("{}", serde_json::to_string(&payload).unwrap());
 
     // get answer
     let answer = get_answer(&payload.query).await;
@@ -33,7 +33,7 @@ pub async fn submit(Json(payload): Json<SubmitRequest>) -> (StatusCode, Json<Sub
         response: answer,
     };
 
-    log::info!("{}", serde_json::to_string(&response).unwrap());
+    tracing::info!("{}", serde_json::to_string(&response).unwrap());
 
     (StatusCode::OK, Json(response))
 }
