@@ -10,18 +10,20 @@ use axum::{
     routing::{get, post},
     Router,
 };
-use dotenv_codegen::dotenv;
+use dotenv::dotenv;
 use listenfd::ListenFd;
+use std::env;
 use std::net::SocketAddr;
 use std::sync::Arc;
 use std::time::Duration;
 use tokio::net::TcpListener;
 use tower_governor::{governor::GovernorConfigBuilder, GovernorLayer};
 
-const QA_API_KEY: &str = dotenv!("QA_API_KEY");
-
 #[tokio::main]
 async fn main() {
+    // init
+    dotenv().ok();
+
     // init logger
     tracing_subscriber::fmt().json().init();
 
@@ -74,9 +76,8 @@ async fn main() {
 
 async fn auth_middleware(req: Request, next: Next) -> Response {
     if let Some(api_key) = req.headers().get("x-api-key") {
-        println!("{:?}", api_key);
-
-        if api_key == QA_API_KEY {
+        let qa_api_key = env::var("QA_API_KEY").expect("Please specify env QA_API_KEY");
+        if api_key == &qa_api_key {
             return next.run(req).await;
         }
     }

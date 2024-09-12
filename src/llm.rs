@@ -1,11 +1,9 @@
-use dotenv_codegen::dotenv;
 use reqwest::Client;
 use serde_derive::Deserialize;
 use serde_json::from_str;
+use std::env;
 use std::error::Error;
 use std::ops::Index;
-
-const GOOGLE_AI_API_KEY: &str = dotenv!("GOOGLE_AI_API_KEY");
 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -45,7 +43,10 @@ pub struct Part {
 pub async fn llm_call(query: &String) -> Result<String, Box<dyn Error>> {
     let client = Client::new();
 
-    let url = format!("https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={}", GOOGLE_AI_API_KEY);
+    let google_ai_api_key =
+        env::var("GOOGLE_AI_API_KEY").expect("Please specify env GOOGLE_AI_API_KEY");
+    let url = format!("https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={}", google_ai_api_key);
+
     let payload = &serde_json::json!(
         {
             "contents": [{
