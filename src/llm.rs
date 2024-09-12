@@ -74,7 +74,7 @@ pub async fn llm_call(query: &String) -> Result<String, Box<dyn Error>> {
     Ok(answer)
 }
 
-pub async fn get_answer(question: &String) -> &str {
+pub async fn get_answer(question: &String) -> String {
     let question_prompt = format!("Answer following question about data engineering: {}. Answer should be within 4 paragraphs. Please respond in Thai", question);
     let answer = llm_call(&question_prompt).await.unwrap();
 
@@ -82,13 +82,10 @@ pub async fn get_answer(question: &String) -> &str {
     let verify_prompt = format!("Your role is to verify that the following text is a question related to data engineering: {}. Please only answer with only True or False", question);
     let verify_answer = llm_call(&verify_prompt).await.unwrap();
 
-    let mut response = "";
-    match verify_answer.as_str() {
-        "True" => response = &answer,
-        "False" => response = "Error: question should be about data engineering or related topics.",
-        _ => {
-            log::error!("Error verifying question");
-        }
-    }
+    // return response
+    let response = match verify_answer.trim() {
+        "True" => answer,
+        _ => "Error: question should be about data engineering or related topics.".to_string(),
+    };
     response
 }

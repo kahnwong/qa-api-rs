@@ -22,7 +22,7 @@ pub async fn root() -> &'static str {
 
 pub async fn submit(Json(payload): Json<SubmitRequest>) -> (StatusCode, Json<SubmitResponse>) {
     // get answer
-    let answer = get_answer(&payload.query).await.unwrap();
+    let answer = get_answer(&payload.query).await;
 
     // return response
     let response = SubmitResponse {
