@@ -1,4 +1,4 @@
-use crate::llm::llm_call;
+use crate::llm::get_answer;
 use axum::http::StatusCode;
 use axum::Json;
 use serde_derive::{Deserialize, Serialize};
@@ -22,7 +22,7 @@ pub async fn root() -> &'static str {
 
 pub async fn submit(Json(payload): Json<SubmitRequest>) -> (StatusCode, Json<SubmitResponse>) {
     // get answer
-    let answer = llm_call(&payload.query).await.unwrap();
+    let answer = get_answer(&payload.query).await.unwrap();
 
     // return response
     let response = SubmitResponse {
