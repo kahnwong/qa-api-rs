@@ -29,7 +29,7 @@ pub async fn submit(Json(payload): Json<SubmitRequest>) -> (StatusCode, Json<Sub
     // return response
     let response = SubmitResponse {
         request_id: payload.request_id,
-        query: (&payload.query).to_string(),
+        query: payload.query,
         response: answer,
     };
 
