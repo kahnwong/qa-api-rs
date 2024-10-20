@@ -1,5 +1,6 @@
 mod llm;
 mod routes;
+
 use crate::routes::{root, submit};
 use axum::extract::Request;
 use axum::http::StatusCode;
@@ -12,6 +13,7 @@ use axum::{
 };
 use dotenv::dotenv;
 use listenfd::ListenFd;
+use serde::Deserialize;
 use std::env;
 use std::net::SocketAddr;
 use std::sync::Arc;
@@ -19,10 +21,19 @@ use std::time::Duration;
 use tokio::net::TcpListener;
 use tower_governor::{governor::GovernorConfigBuilder, GovernorLayer};
 
+#[allow(dead_code)]
+#[derive(Clone, Deserialize, Debug)]
+pub struct Config {
+    // mode: String,
+    google_ai_api_key: String,
+    qa_api_key: String,
+}
+
 #[tokio::main]
 async fn main() {
     // init
     dotenv().ok();
+    let config = envy::from_env::<Config>().unwrap();
 
     // init logger
     tracing_subscriber::fmt().json().init();
@@ -52,7 +63,8 @@ async fn main() {
         .layer(middleware::from_fn(auth_middleware))
         .layer(GovernorLayer {
             config: governor_conf,
-        });
+        })
+        .with_state(config);
 
     let app = base.merge(qa);
 

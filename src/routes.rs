@@ -1,4 +1,6 @@
 use crate::llm::get_answer;
+use crate::Config;
+use axum::extract::State;
 use axum::http::StatusCode;
 use axum::Json;
 use serde_derive::{Deserialize, Serialize};
@@ -20,11 +22,14 @@ pub async fn root() -> &'static str {
     "Welcome to qa-api-rs"
 }
 
-pub async fn submit(Json(payload): Json<SubmitRequest>) -> (StatusCode, Json<SubmitResponse>) {
+pub async fn submit(
+    State(config): State<Config>,
+    Json(payload): Json<SubmitRequest>,
+) -> (StatusCode, Json<SubmitResponse>) {
     tracing::info!("{}", serde_json::to_string(&payload).unwrap());
 
     // get answer
-    let answer = get_answer(&payload.query).await;
+    let answer = get_answer(&config.google_ai_api_key, &payload.query).await;
 
     // return response
     let response = SubmitResponse {
