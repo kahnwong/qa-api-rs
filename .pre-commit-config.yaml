@@ -33,7 +33,7 @@ repos:
           - --ignore
           - DL3027
   - repo: https://github.com/kahnwong/pre-commit
-    rev: "940c073"
+    rev: "c6005a9"
     hooks:
       - id: rust-fmt
       - id: cargo-check
