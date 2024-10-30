@@ -32,9 +32,9 @@ repos:
           - DL3018
           - --ignore
           - DL3027
-  - repo: https://github.com/doublify/pre-commit-rust
-    rev: v1.0
+  - repo: https://github.com/kahnwong/pre-commit
+    rev: "940c073"
     hooks:
-      - id: fmt
+      - id: rust-fmt
       - id: cargo-check
-      - id: clippy
+      - id: cargo-clippy
