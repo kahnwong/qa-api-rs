@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-axum = "0.7.9"
+axum = "0.8.0"
 dotenv = "0.15.0"
 envy = "0.4.2"
 listenfd = "1.0.1"
