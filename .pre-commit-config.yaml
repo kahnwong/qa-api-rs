@@ -1,7 +1,6 @@
----
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.6.0
+    rev: v5.0.0
     hooks:
       - id: trailing-whitespace
       - id: end-of-file-fixer
@@ -15,15 +14,13 @@ repos:
       - id: detect-private-key
       - id: fix-byte-order-marker
       - id: mixed-line-ending
-  - repo: https://github.com/jumanjihouse/pre-commit-hook-yamlfmt
-    rev: 0.2.3
+  - repo: https://github.com/kahnwong/pre-commit
+    rev: "af3687a"
     hooks:
+      - id: rust-fmt
+      - id: cargo-check
+      - id: cargo-clippy
       - id: yamlfmt
-        args: [--mapping, "2", --sequence, "4", --offset, "2", --width, "150", --preserve-quotes]
-        exclude: ^.github/dependabot.yaml
-  - repo: https://github.com/AleksaC/hadolint-py
-    rev: v2.12.1b3
-    hooks:
       - id: hadolint
         args:
           - --ignore
@@ -32,9 +29,4 @@ repos:
           - DL3018
           - --ignore
           - DL3027
-  - repo: https://github.com/kahnwong/pre-commit
-    rev: "c6005a9"
-    hooks:
-      - id: rust-fmt
-      - id: cargo-check
-      - id: cargo-clippy
+      - id: trufflehog
