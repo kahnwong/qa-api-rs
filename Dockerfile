@@ -14,7 +14,9 @@ RUN cargo build --release && \
     cp ./target/release/qa-api-rs /qa-api-rs
 
 # hadolint ignore=DL3007
-FROM alpine:latest AS deploy
+FROM gcr.io/distroless/static-debian13:nonroot AS deploy
+
+WORKDIR /
 COPY --from=build /qa-api-rs /
 
-CMD ["/qa-api-rs"]
+ENTRYPOINT ["/qa-api-rs"]
