@@ -44,7 +44,7 @@ pub async fn llm_call(
     query: &String,
 ) -> Result<String, Box<dyn Error>> {
     let client = Client::new();
-    let url = format!("https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={}", google_ai_api_key);
+    let url = format!("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={}", google_ai_api_key);
 
     let payload = &serde_json::json!(
         {
